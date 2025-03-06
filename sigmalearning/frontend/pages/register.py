@@ -71,6 +71,9 @@ if st.button("Register"):
         })
         if response.status_code == 201:
             st.success(response.json().get("message", "Registration successful"))
+            st.session_state.user_logged_in = True
+            st.switch_page("pages/learners_dashboard.py")
+
         else:
             st.error(response.json().get("error", "Registration failed"))
     except requests.exceptions.RequestException as e:

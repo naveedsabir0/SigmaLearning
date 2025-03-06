@@ -3,69 +3,77 @@ import streamlit as st
 # Remove Streamlit's default sidebar
 st.set_page_config(page_title="SIGMA Learning - Welcome", page_icon="🚀", layout="wide", initial_sidebar_state="collapsed")
 
-# Inject custom CSS to completely remove the sidebar gap and add video background with futuristic fonts
 st.markdown(f"""
     <style>
-        /* Hide sidebar */
+        /* Hide Streamlit's sidebar */
         [data-testid="stSidebarNav"], [data-testid="stSidebar"] {{
             display: none !important;
         }}
 
+        /* Import fonts */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&family=Exo:wght@400;700&display=swap');
 
-        body {{
-            font-family: 'Exo', sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
+        /* Base styling similar to provided code */
+        html, body {{
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100%;
+            font-family: 'Exo', sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+        }}
+
+        body {{
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }}
-        
-        .container {{
             text-align: center;
-            max-width: 700px;
-            margin: auto;
+        }}
+
+        .container {{
             position: relative;
             z-index: 1;
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
         }}
-        
+
         .title {{
             font-family: 'Orbitron', sans-serif;
             font-size: 48px;
             font-weight: 700;
-            color: #00FFFF;
-            text-align: center;
-            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #00FFFF;
+            /* Netflix-like fade in transition */
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out forwards;
         }}
-        
+
         .subtitle {{
             font-family: 'Exo', sans-serif;
             font-size: 22px;
             font-weight: 300;
-            color: #EAEAEA;
-            text-align: center;
             margin-bottom: 40px;
+            color: #EAEAEA;
+            /* Slight delay for subtitle */
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 0.5s forwards;
         }}
-        
+
         .button-container {{
             display: flex;
             justify-content: center;
             gap: 20px;
         }}
-        
-        .custom-button {{
+
+        .custom-button, .stButton > button {{
             font-family: 'Rajdhani', sans-serif;
             background-color: #0070FF;
             border: none;
-            color: white;
+            color: #FFFFFF;
             font-size: 20px;
             font-weight: bold;
             padding: 15px 30px;
@@ -73,14 +81,13 @@ st.markdown(f"""
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
             width: 200px;
             text-align: center;
             letter-spacing: 1px;
             text-transform: uppercase;
         }}
 
-        .custom-button:hover {{
+        .custom-button:hover, .stButton > button:hover {{
             background-color: #00D9FF;
             transform: scale(1.05);
         }}
@@ -100,10 +107,24 @@ st.markdown(f"""
             width: 100%;
             height: 100%;
             object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
             opacity: 0.6;
+        }}
+
+        /* Fade In Up Animation */
+        @keyframes fadeInUp {{
+            from {{
+                opacity: 0;
+                transform: translateY(20px);
+            }}
+            to {{
+                opacity: 1;
+                transform: translateY(0);
+            }}
+        }}
+
+        /* Additional minor tweaks for consistency */
+        a, button {{
+            font-family: 'Rajdhani', sans-serif;
         }}
     </style>
     

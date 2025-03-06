@@ -90,6 +90,9 @@ if st.button("Login"):
         })
         if response.status_code == 200:
             st.success("Login successful!")
+            st.session_state.user_logged_in = True
+            st.switch_page("pages/learners_dashboard.py")
+
         else:
             st.error(f"Error: {response.status_code} - {response.text}")
     except requests.exceptions.RequestException as e:
