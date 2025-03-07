@@ -1,7 +1,12 @@
 import streamlit as st
 
 # Remove Streamlit's default sidebar
-st.set_page_config(page_title="SIGMA Learning - Welcome", page_icon="🚀", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(
+    page_title="SIGMA Learning - Welcome", 
+    page_icon="🚀", 
+    layout="wide", 
+    initial_sidebar_state="collapsed"
+)
 
 st.markdown(f"""
     <style>
@@ -13,7 +18,7 @@ st.markdown(f"""
         /* Import fonts */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&family=Exo:wght@400;700&display=swap');
 
-        /* Base styling similar to provided code */
+        /* Base styling */
         html, body {{
             margin: 0;
             padding: 0;
@@ -46,8 +51,7 @@ st.markdown(f"""
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 10px;
-            color: #00FFFF;
-            /* Netflix-like fade in transition */
+            color: #FFFFFF;
             opacity: 0;
             animation: fadeInUp 1.5s ease-out forwards;
         }}
@@ -56,9 +60,8 @@ st.markdown(f"""
             font-family: 'Exo', sans-serif;
             font-size: 22px;
             font-weight: 300;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             color: #EAEAEA;
-            /* Slight delay for subtitle */
             opacity: 0;
             animation: fadeInUp 1.5s ease-out 0.5s forwards;
         }}
@@ -67,6 +70,7 @@ st.markdown(f"""
             display: flex;
             justify-content: center;
             gap: 20px;
+            margin-bottom: 40px;
         }}
 
         .custom-button, .stButton > button {{
@@ -92,7 +96,50 @@ st.markdown(f"""
             transform: scale(1.05);
         }}
 
-        /* 🎥 Video Background */
+        /* Description paragraph styling with fade in */
+        .description {{
+            font-family: 'Exo', sans-serif;
+            font-size: 18px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            color: #FFFFFF;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 0.7s forwards;
+        }}
+
+        /* Footer Styling */
+        .footer {{
+            width: 100%;
+            background-color: #121212;
+            padding: 20px 0;
+            text-align: center;
+            font-family: 'Exo', sans-serif;
+            font-size: 14px;
+            color: #EAEAEA;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 1.1s forwards;
+        }}
+        .footer .footer-text {{
+            margin-bottom: 10px;
+        }}
+        .footer .social-icons {{
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }}
+        .footer .social-icons a {{
+            display: inline-block;
+        }}
+        .footer .social-icons img {{
+            width: 24px;
+            height: 24px;
+        }}
+
+        /* Video Background */
         .video-container {{
             position: fixed;
             top: 0;
@@ -122,7 +169,7 @@ st.markdown(f"""
             }}
         }}
 
-        /* Additional minor tweaks for consistency */
+        /* Minor tweaks */
         a, button {{
             font-family: 'Rajdhani', sans-serif;
         }}
@@ -144,14 +191,45 @@ st.markdown('<div class="subtitle">Empowering digital education through innovati
 
 # Navigation Buttons
 st.markdown('<div class="button-container">', unsafe_allow_html=True)
-
 col1, col2 = st.columns([1, 1])
 with col1:
     if st.button("Register"):
-        st.switch_page("pages/register.py")  # Navigate to Register Page
+        st.switch_page("pages/register.py")
 with col2:
     if st.button("Login"):
-        st.switch_page("pages/login.py")  # Navigate to Login Page
+        st.switch_page("pages/login.py")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Description paragraph placed after the buttons
+st.markdown('<div class="description">Discover an innovative platform that redefines digital learning with cutting-edge tools, interactive courses, and a community dedicated to educational excellence.</div>', unsafe_allow_html=True)
+
+# Footer with social media icons (Instagram, Facebook, YouTube, LinkedIn)
+st.markdown(
+    """
+    <div class="footer">
+        <div class="footer-text">
+            Sigma Learning © 2025<br>
+            University of Greater Manchester<br>
+            Coded by Naveed Sabir
+        </div>
+        <div class="social-icons">
+            <a href="https://instagram.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+            </a>
+            <a href="https://facebook.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook">
+            </a>
+            <a href="https://youtube.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png" alt="YouTube">
+            </a>
+            <a href="https://linkedin.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
+            </a>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+# Add a footer with social media icons
