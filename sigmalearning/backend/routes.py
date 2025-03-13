@@ -15,13 +15,16 @@ def get_users():
     return jsonify(users_list)
 
 @routes_bp.route('/add_feedback', methods=['POST'])
+@jwt_required()
 def add_feedback():
     data = request.get_json()
-    if not data or "user_id" not in data or "comments" not in data:
+    if not data or "comments" not in data:
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        feedback = Feedback(user_id=data["user_id"], comments=data["comments"])
+        # Get user id from JWT; convert to int if necessary
+        user_id = int(get_jwt_identity())
+        feedback = Feedback(user_id=user_id, comments=data["comments"])
         db.session.add(feedback)
         db.session.commit()
         return jsonify({"message": "Feedback submitted successfully"}), 201
@@ -43,9 +46,11 @@ def get_user_profile():
             "email": user.email,
             "home_address": user.home_address or "",
             "country": user.country or "",
+            "city": user.city or "",
             "region": user.region or "",
             "phone": user.phone or "",
-            "profile_pic": user.profile_pic or ""
+            "profile_pic": user.profile_pic or "",
+            "email_verified": user.email_verified
         }), 200
     except Exception as e:
         current_app.logger.error("Error fetching user profile: %s", e)
@@ -66,13 +71,12 @@ def update_profile():
             current_app.logger.error("No data provided in update_profile")
             return jsonify({"error": "No data provided"}), 400
 
-        # Debug log for incoming payload
         current_app.logger.info("Updating profile for user %s with data: %s", user_id, data)
 
-        # Update all profile fields from the payload.
         user.email = data.get('email', user.email)
         user.home_address = data.get('home_address', user.home_address)
         user.country = data.get('country', user.country)
+        user.city = data.get('city', user.city)
         user.region = data.get('region', user.region)
         user.phone = data.get('phone', user.phone)
         user.profile_pic = data.get('profile_pic', user.profile_pic)
@@ -85,4 +89,3 @@ def update_profile():
         current_app.logger.error("Error updating profile: %s", e)
         db.session.rollback()
         return jsonify({"error": "An error occurred while updating profile"}), 500
-

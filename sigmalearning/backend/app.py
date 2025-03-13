@@ -8,8 +8,16 @@ from routes import routes_bp
 from flask_migrate import Migrate
 import os
 
-app = Flask(__name__)
+# Set instance_relative_config=True and set instance_path to backend/instance
+app = Flask(__name__, instance_relative_config=True,
+            instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), "instance"))
 CORS(app)
+
+# Ensure the instance folder exists
+try:
+    os.makedirs(app.instance_path, exist_ok=True)
+except OSError:
+    pass
 
 # Load configuration
 app.config.from_object(Config)
@@ -46,5 +54,3 @@ if __name__ == '__main__':
             db.session.commit()
             print("Superuser created successfully!")
     app.run(debug=True)
-
-

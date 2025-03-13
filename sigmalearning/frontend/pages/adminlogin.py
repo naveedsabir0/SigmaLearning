@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 st.set_page_config(page_title="Admin Login - SIGMA Learning", page_icon="🛠️")
 
@@ -18,7 +19,6 @@ st.markdown("""
             align-items: center;
             justify-content: center;
         }
-        /* Removed container box styling */
         .title {
             font-size: 36px;
             font-weight: 700;
@@ -91,15 +91,15 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Backend URL
-BACKEND_URL = "http://127.0.0.1:5000/auth"
+# Backend URL from environment variable
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:5000/auth")
 
 # Admin Login Form (as a form, without an outer container box)
 with st.form("admin_login_form"):
     st.markdown('<div class="title">Admin Panel</div>', unsafe_allow_html=True)
     st.markdown('<div class="subtitle">Superuser & Admin Login</div>', unsafe_allow_html=True)
-    admin_username = st.text_input("Admin Username", key="admin_username", value="SuperAdmin")
-    admin_password = st.text_input("Admin Password", type="password", key="admin_password", value="SuperSecurePassword")
+    admin_username = st.text_input("Admin Username", key="admin_username")
+    admin_password = st.text_input("Admin Password", type="password", key="admin_password")
     admin_submit = st.form_submit_button("Login as Admin")
     
     if admin_submit:

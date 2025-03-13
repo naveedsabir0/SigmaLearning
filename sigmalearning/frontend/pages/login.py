@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 st.set_page_config(page_title="Login - SIGMA Learning", page_icon="🔑")
 
@@ -74,8 +75,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Backend URL
-BACKEND_URL = "http://127.0.0.1:5000/auth"
+# Backend URL from environment variable
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:5000/auth")
 
 # Display title outside the form
 st.title("SIGMA Learning Platform")
@@ -89,10 +90,11 @@ with st.form("login_form"):
     
     if submit:
         try:
-            response = requests.post(f"{BACKEND_URL}/login", json={
-                "username": login_username,
-                "password": login_password
-            })
+            with st.spinner("Logging in..."):
+                response = requests.post(f"{BACKEND_URL}/login", json={
+                    "username": login_username,
+                    "password": login_password
+                })
             if response.status_code == 200:
                 data = response.json()
                 access_token = data["access_token"]
@@ -108,9 +110,11 @@ with st.form("login_form"):
                     st.session_state.email = profile_data["email"]
                     st.session_state.home_address = profile_data.get("home_address", "")
                     st.session_state.country = profile_data.get("country", "")
+                    st.session_state.city = profile_data.get("city", "")
                     st.session_state.region = profile_data.get("region", "")
                     st.session_state.phone = profile_data.get("phone", "")
                     st.session_state.profile_pic = profile_data.get("profile_pic", "")
+                    st.session_state.email_verified = profile_data.get("email_verified", False)
                 st.switch_page("pages/learners_dashboard.py")
             else:
                 st.error(f"Error: {response.status_code} - {response.text}")

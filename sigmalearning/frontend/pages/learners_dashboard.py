@@ -4,9 +4,24 @@ import base64
 from PIL import Image
 import io
 
+# Helper function to process and encode the uploaded image as WebP for better efficiency
+def process_uploaded_image(uploaded_file):
+    image = Image.open(uploaded_file)
+    image = image.convert("RGB")  # Ensure image is in RGB mode
+    image.thumbnail((300, 300))   # Resize the image to a maximum size (300x300)
+    buffer = io.BytesIO()
+    image.save(buffer, format="WEBP", quality=70)  # Save image as WebP with compression quality 70
+    encoded_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return encoded_image, image
+
 # Check if user is logged in; if not, show error and stop execution.
 if "user_logged_in" not in st.session_state or not st.session_state.user_logged_in:
     st.error("Access denied. Please log in to view this page.")
+    st.stop()
+
+# Prevent access if email is not verified
+if "email_verified" not in st.session_state or not st.session_state.email_verified:
+    st.error("Your email is not verified. Please verify your email before accessing the dashboard.")
     st.stop()
 
 username = st.session_state.get("username", "Learner")
@@ -147,7 +162,7 @@ with st.sidebar:
         st.switch_page("pages/login.py")
 
 # ---------------------------
-# Main Content Area (unchanged except for "My Profile")
+# Main Content Area (unchanged except for "My Profile" and "Settings")
 # ---------------------------
 with st.container():
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
@@ -172,14 +187,9 @@ with st.container():
         st.markdown("**Upload a New Profile Picture:**")
         uploaded_pic = st.file_uploader("Select an image", type=["png", "jpg", "jpeg"], key="profile_pic_upload")
         if uploaded_pic is not None:
-            # Use Pillow to open, resize, and compress the image
-            image = Image.open(uploaded_pic)
-            image.thumbnail((300, 300))
-            buffer = io.BytesIO()
-            image.save(buffer, format="JPEG", quality=70)
-            encoded_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
+            encoded_image, processed_image = process_uploaded_image(uploaded_pic)
             st.session_state["profile_pic"] = encoded_image
-            st.image(image, width=150)
+            st.image(processed_image, width=150)
             st.success("Profile picture updated!")
         
         # --- Remove Profile Picture Button ---
@@ -189,6 +199,7 @@ with st.container():
                 "email": st.session_state.get("email", ""),
                 "home_address": st.session_state.get("home_address", ""),
                 "country": st.session_state.get("country", ""),
+                "city": st.session_state.get("city", ""),
                 "region": st.session_state.get("region", ""),
                 "phone": st.session_state.get("phone", ""),
                 "profile_pic": ""
@@ -208,6 +219,7 @@ with st.container():
             email_input = st.text_input("Email Address", value=st.session_state.get("email", ""), key="email_input_form")
             address_input = st.text_input("Home Address", value=st.session_state.get("home_address", ""), key="address_input_form")
             country_input = st.text_input("Country", value=st.session_state.get("country", ""), key="country_input_form")
+            city_input = st.text_input("City", value=st.session_state.get("city", ""), key="city_input_form")
             region_input = st.text_input("Region", value=st.session_state.get("region", ""), key="region_input_form")
             phone_input = st.text_input("Phone Number", value=st.session_state.get("phone", ""), key="phone_input_form")
             
@@ -218,42 +230,97 @@ with st.container():
                     "email": email_input,
                     "home_address": address_input,
                     "country": country_input,
+                    "city": city_input,
                     "region": region_input,
                     "phone": phone_input,
                     "profile_pic": st.session_state.get("profile_pic", "")
                 }
                 headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
-                try:
-                    response = requests.put("http://127.0.0.1:5000/api/update_profile", json=payload, headers=headers)
-                    if response.status_code == 200:
-                        st.success("Profile updated successfully!")
-                        # Refresh the user profile from the backend:
-                        profile_resp = requests.get("http://127.0.0.1:5000/api/user_profile", headers=headers)
-                        if profile_resp.status_code == 200:
-                            profile_data = profile_resp.json()
-                            st.session_state["username"] = profile_data.get("username", username)
-                            st.session_state["email"] = profile_data.get("email", "")
-                            st.session_state["home_address"] = profile_data.get("home_address", "")
-                            st.session_state["country"] = profile_data.get("country", "")
-                            st.session_state["region"] = profile_data.get("region", "")
-                            st.session_state["phone"] = profile_data.get("phone", "")
-                            st.session_state["profile_pic"] = profile_data.get("profile_pic", "")
-                            username = st.session_state["username"]
+                with st.spinner("Updating profile..."):
+                    try:
+                        response = requests.put("http://127.0.0.1:5000/api/update_profile", json=payload, headers=headers)
+                        if response.status_code == 200:
+                            st.success("Profile updated successfully!")
+                            # Refresh the user profile from the backend:
+                            profile_resp = requests.get("http://127.0.0.1:5000/api/user_profile", headers=headers)
+                            if profile_resp.status_code == 200:
+                                profile_data = profile_resp.json()
+                                st.session_state["username"] = profile_data.get("username", username)
+                                st.session_state["email"] = profile_data.get("email", "")
+                                st.session_state["home_address"] = profile_data.get("home_address", "")
+                                st.session_state["country"] = profile_data.get("country", "")
+                                st.session_state["city"] = profile_data.get("city", "")
+                                st.session_state["region"] = profile_data.get("region", "")
+                                st.session_state["phone"] = profile_data.get("phone", "")
+                                st.session_state["profile_pic"] = profile_data.get("profile_pic", "")
+                                username = st.session_state["username"]
+                            else:
+                                st.error("Failed to refresh profile data.")
                         else:
-                            st.error("Failed to refresh profile data.")
-                    else:
-                        st.error("Failed to update profile.")
-                        st.error(f"Server response: {response.json().get('error', 'Unknown error')}")
-                except Exception as e:
-                    st.error("Error connecting to the backend.")
-                    st.error(e)
+                            st.error("Failed to update profile.")
+                            st.error(f"Server response: {response.json().get('error', 'Unknown error')}")
+                    except Exception as e:
+                        st.error("Error connecting to the backend.")
+                        st.error(e)
         
         st.markdown("</div>", unsafe_allow_html=True)
     
     elif selected_page == "Settings":
         st.markdown('<div id="settings" class="section">', unsafe_allow_html=True)
         st.markdown("<h2>Settings</h2>", unsafe_allow_html=True)
-        st.write("Settings content goes here.")
+        
+        st.markdown("### Two-Factor Authentication (2FA)")
+        st.write("Enhance your account security by activating 2FA. Enter your phone number below to receive a 6-digit activation code.")
+        
+        # Form to send 2FA activation code
+        with st.form("activate_2fa_form"):
+            phone_input = st.text_input("Phone Number", value=st.session_state.get("phone", ""), key="phone_input")
+            send_code = st.form_submit_button("Send Activation Code")
+            if send_code:
+                headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
+                payload = {"phone": phone_input}
+                response = requests.post("http://127.0.0.1:5000/auth/activate_2fa", json=payload, headers=headers)
+                if response.status_code == 200:
+                    st.success("Activation code sent to your phone.")
+                else:
+                    st.error(f"Error: {response.json().get('error', 'Failed to send activation code')}")
+        
+        st.write("Once you receive the code, enter it below to activate 2FA:")
+        
+        # Form to verify the activation code and activate 2FA
+        with st.form("verify_2fa_activation_form"):
+            activation_code = st.text_input("Activation Code", key="activation_code")
+            verify_activation = st.form_submit_button("Activate 2FA")
+            if verify_activation:
+                headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
+                payload = {"activation_code": activation_code}
+                response = requests.post("http://127.0.0.1:5000/auth/verify_2fa_activation", json=payload, headers=headers)
+                if response.status_code == 200:
+                    st.success("2FA activated successfully!")
+                else:
+                    st.error(f"Error: {response.json().get('error', 'Failed to activate 2FA')}")
+        
+        # --- New 2FA Toggle with Confirmation ---
+        st.markdown("### 2FA Toggle")
+        current_2fa = st.session_state.get("two_fa_enabled", False)
+        new_2fa = st.checkbox("Enable Two-Factor Authentication", value=current_2fa, key="toggle_2fa")
+        
+        # If the toggle value has changed, show a confirmation expander asking for the password.
+        if new_2fa != current_2fa:
+            with st.expander("Confirm 2FA Change", expanded=True):
+                st.write("Please enter your password to confirm this change.")
+                password_input = st.text_input("Password", type="password", key="confirm_2fa_password")
+                confirm_button = st.button("Confirm 2FA Change", key="confirm_2fa_change")
+                if confirm_button:
+                    headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
+                    payload = {"password": password_input, "two_fa_enabled": new_2fa}
+                    response = requests.post("http://127.0.0.1:5000/auth/update_2fa_setting", json=payload, headers=headers)
+                    if response.status_code == 200:
+                        st.success("2FA setting updated successfully!")
+                        st.session_state["two_fa_enabled"] = new_2fa
+                    else:
+                        st.error(f"Error: {response.json().get('error', 'Failed to update 2FA setting')}")
+        
         st.markdown("</div>", unsafe_allow_html=True)
     
     elif selected_page == "All Courses":

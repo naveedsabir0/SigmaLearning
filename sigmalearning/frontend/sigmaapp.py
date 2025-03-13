@@ -232,4 +232,3 @@ st.markdown(
 )
 
 st.markdown('</div>', unsafe_allow_html=True)
-# Add a footer with social media icons

@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 st.set_page_config(page_title="Register - SIGMA Learning", page_icon="📝")
 
@@ -51,8 +52,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Backend URL
-BACKEND_URL = "http://127.0.0.1:5000/auth"
+# Backend URL from environment variable
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:5000/auth")
 
 st.title("SIGMA Learning Platform")
 
@@ -65,39 +66,15 @@ with st.form("register_form"):
 
 if register_submit:
     try:
-        response = requests.post(f"{BACKEND_URL}/register", json={
-            "username": reg_username,
-            "email": reg_email,
-            "password": reg_password
-        })
-        if response.status_code == 201:
-            st.success(response.json().get("message", "Registration successful"))
-            # Auto-login after registration
-            login_resp = requests.post(f"{BACKEND_URL}/login", json={
+        with st.spinner("Registering..."):
+            response = requests.post(f"{BACKEND_URL}/register", json={
                 "username": reg_username,
+                "email": reg_email,
                 "password": reg_password
             })
-            if login_resp.status_code == 200:
-                login_data = login_resp.json()
-                access_token = login_data["access_token"]
-                st.session_state.user_logged_in = True
-                st.session_state.access_token = access_token
-                # Fetch user profile
-                headers = {"Authorization": f"Bearer {access_token}"}
-                profile_resp = requests.get("http://127.0.0.1:5000/api/user_profile", headers=headers)
-                if profile_resp.status_code == 200:
-                    profile_data = profile_resp.json()
-                    st.session_state.user_id = profile_data["id"]
-                    st.session_state.username = profile_data["username"]
-                    st.session_state.email = profile_data["email"]
-                    st.session_state.home_address = profile_data.get("home_address", "")
-                    st.session_state.country = profile_data.get("country", "")
-                    st.session_state.region = profile_data.get("region", "")
-                    st.session_state.phone = profile_data.get("phone", "")
-                    st.session_state.profile_pic = profile_data.get("profile_pic", "")
-                st.switch_page("pages/learners_dashboard.py")
-            else:
-                st.error("Auto-login failed after registration")
+        if response.status_code == 201:
+            st.success(response.json().get("message", "Registration successful"))
+            st.info("Please check your email and verify your account before logging in.")
         else:
             st.error(response.json().get("error", "Registration failed"))
     except requests.exceptions.RequestException as e:
@@ -112,4 +89,3 @@ with col1:
 with col2:
     if st.button("Admin Login", key="goto_admin"):
         st.switch_page("pages/adminlogin.py")
- 

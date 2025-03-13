@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 # Check if admin is logged in; if not, show error and stop execution.
 if 'admin_logged_in' not in st.session_state or not st.session_state.admin_logged_in:
@@ -7,6 +8,9 @@ if 'admin_logged_in' not in st.session_state or not st.session_state.admin_logge
     st.stop()
 
 st.set_page_config(page_title="Admin Dashboard - SIGMA Learning", page_icon="🚀", layout="wide")
+
+# Define BACKEND_URL from environment or default
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:5000")
 
 # Futuristic custom CSS with video background
 st.markdown("""
@@ -117,9 +121,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.button("Logout"):
-    # Remove the admin_logged_in flag from session state
     st.session_state.pop("admin_logged_in", None)
-    # Redirect to the admin login page
     st.switch_page("pages/adminlogin.py")
 
 # Overview Section
@@ -134,7 +136,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div id="users" class="section">', unsafe_allow_html=True)
 st.subheader("Manage Users")
 try:
-    response = requests.get("http://127.0.0.1:5000/api/users")
+    response = requests.get(f"{BACKEND_URL}/api/users")
     if response.status_code == 200:
         users = response.json()
         st.write("User List:")

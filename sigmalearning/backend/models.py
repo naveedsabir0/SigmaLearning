@@ -1,7 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-
-db = SQLAlchemy()
+from database import db
+from datetime import datetime  # if needed elsewhere
+from sqlalchemy import text
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -12,11 +12,26 @@ class User(db.Model):
     # Additional profile fields:
     home_address = db.Column(db.String(200), nullable=True)
     country = db.Column(db.String(100), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
     region = db.Column(db.String(100), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
     profile_pic = db.Column(db.Text, nullable=True)  # Stored as a base64 string
 
+    # New fields for email verification:
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    verification_token = db.Column(db.String(100), nullable=True)
     
+    # New fields for password reset:
+    reset_token = db.Column(db.String(100), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+
+    # Two-factor authentication fields:
+    two_fa_enabled = db.Column(db.Boolean, default=False, nullable=False, server_default=text("0"))
+    activation_2fa_code = db.Column(db.String(6), nullable=True)
+    activation_2fa_expiry = db.Column(db.DateTime, nullable=True)
+    login_2fa_code = db.Column(db.String(6), nullable=True)
+    login_2fa_expiry = db.Column(db.DateTime, nullable=True)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
