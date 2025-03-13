@@ -18,18 +18,7 @@ st.markdown("""
             align-items: center;
             justify-content: center;
         }
-        .container {
-            text-align: center;
-            max-width: 500px;
-            margin: auto;
-            position: relative;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 40px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.3);
-        }
+        /* Removed container box styling */
         .title {
             font-size: 36px;
             font-weight: 700;
@@ -105,34 +94,31 @@ st.markdown("""
 # Backend URL
 BACKEND_URL = "http://127.0.0.1:5000/auth"
 
-# Admin Login Form
-st.markdown('<div class="container">', unsafe_allow_html=True)
-st.markdown('<div class="title">Admin Panel</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Superuser & Admin Login</div>', unsafe_allow_html=True)
+# Admin Login Form (as a form, without an outer container box)
+with st.form("admin_login_form"):
+    st.markdown('<div class="title">Admin Panel</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Superuser & Admin Login</div>', unsafe_allow_html=True)
+    admin_username = st.text_input("Admin Username", key="admin_username", value="SuperAdmin")
+    admin_password = st.text_input("Admin Password", type="password", key="admin_password", value="SuperSecurePassword")
+    admin_submit = st.form_submit_button("Login as Admin")
+    
+    if admin_submit:
+        try:
+            response = requests.post(f"{BACKEND_URL}/admin_login", json={
+                "username": admin_username,
+                "password": admin_password
+            })
+            if response.status_code == 200:
+                st.success("Admin Login Successful! Redirecting...")
+                st.session_state.admin_logged_in = True
+                st.switch_page("pages/admin_dashboard.py")
+            elif response.status_code == 403:
+                st.error("Access Denied: You are not an admin.")
+            else:
+                st.error(f"Error: {response.status_code} - {response.text}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to backend: {e}")
 
-admin_username = st.text_input("Admin Username", key="admin_username", value="SuperAdmin")
-admin_password = st.text_input("Admin Password", type="password", key="admin_password", value="SuperSecurePassword")
-
-if st.button("Login as Admin"):
-    try:
-        response = requests.post(f"{BACKEND_URL}/admin_login", json={
-            "username": admin_username,
-            "password": admin_password
-        })
-        if response.status_code == 200:
-            st.success("Admin Login Successful! Redirecting...")
-            # Set session state flag so the dashboard knows the admin is logged in.
-            st.session_state.admin_logged_in = True
-            st.switch_page("pages/admin_dashboard.py")
-        elif response.status_code == 403:
-            st.error("Access Denied: You are not an admin.")
-        else:
-            st.error(f"Error: {response.status_code} - {response.text}")
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error connecting to backend: {e}")
-
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Navigate Back to User Login Page
-st.markdown('<a class="back-link" href="/pages/login">Back to User Login</a>', unsafe_allow_html=True)
+# Navigation Back to User Login at the bottom
+if st.button("Back to User Login", key="back_to_login"):
+    st.switch_page("pages/login.py")

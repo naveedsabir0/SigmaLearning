@@ -36,7 +36,7 @@ st.markdown("""
         .stButton>button:hover {
             background-color: #00D9FF;
         }
-            .nav-links {
+        .nav-links {
             font-size: 16px;
             color: #00D9FF;
             text-decoration: none;
@@ -48,7 +48,6 @@ st.markdown("""
         .nav-links:hover {
             text-decoration: underline;
         }
-            
         .admin-button {
             background: linear-gradient(45deg, #00D9FF, #0070FF);
             color: white;
@@ -69,44 +68,74 @@ st.markdown("""
             background: linear-gradient(45deg, #0070FF, #00D9FF);
             transform: scale(1.05);
         }
+        .nav-button-container button {
+            width: 220px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
 # Backend URL
 BACKEND_URL = "http://127.0.0.1:5000/auth"
 
+# Display title outside the form
 st.title("SIGMA Learning Platform")
-st.subheader("Login")
 
-# Login Form
-login_username = st.text_input("Username", key="login_username")
-login_password = st.text_input("Password", type="password", key="login_password")
+# Login form (centered)
+with st.form("login_form"):
+    st.subheader("Login")
+    login_username = st.text_input("Username", key="login_username")
+    login_password = st.text_input("Password", type="password", key="login_password")
+    submit = st.form_submit_button("Login")
+    
+    if submit:
+        try:
+            response = requests.post(f"{BACKEND_URL}/login", json={
+                "username": login_username,
+                "password": login_password
+            })
+            if response.status_code == 200:
+                data = response.json()
+                access_token = data["access_token"]
+                st.session_state.user_logged_in = True
+                st.session_state.access_token = access_token
+                # Fetch user profile
+                headers = {"Authorization": f"Bearer {access_token}"}
+                profile_resp = requests.get("http://127.0.0.1:5000/api/user_profile", headers=headers)
+                if profile_resp.status_code == 200:
+                    profile_data = profile_resp.json()
+                    st.session_state.user_id = profile_data["id"]
+                    st.session_state.username = profile_data["username"]
+                    st.session_state.email = profile_data["email"]
+                    st.session_state.home_address = profile_data.get("home_address", "")
+                    st.session_state.country = profile_data.get("country", "")
+                    st.session_state.region = profile_data.get("region", "")
+                    st.session_state.phone = profile_data.get("phone", "")
+                    st.session_state.profile_pic = profile_data.get("profile_pic", "")
+                st.switch_page("pages/learners_dashboard.py")
+            else:
+                st.error(f"Error: {response.status_code} - {response.text}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to backend: {e}")
 
-if st.button("Login"):
-    try:
-        response = requests.post(f"{BACKEND_URL}/login", json={
-            "username": login_username,
-            "password": login_password
-        })
-        if response.status_code == 200:
-            st.success("Login successful!")
-            st.session_state.user_logged_in = True
-            st.switch_page("pages/learners_dashboard.py")
+st.markdown("<hr>", unsafe_allow_html=True)
 
-        else:
-            st.error(f"Error: {response.status_code} - {response.text}")
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error connecting to backend: {e}")
-
-# Navigate to Register Page (Fixed Navigation)
-col1, col2, col3 = st.columns([1, 3, 1])  # Center the text link
+# Navigation buttons in three equal columns with a large gap.
+col1, col2, col3 = st.columns(3, gap="large")
+with col1:
+    with st.container():
+        st.markdown('<div class="nav-button-container" style="width:220px; margin:auto;">', unsafe_allow_html=True)
+        if st.button("Forgot your password? Reset it here", key="goto_reset"):
+            st.switch_page("pages/reset_password.py")
+        st.markdown('</div>', unsafe_allow_html=True)
 with col2:
-    if st.button("Don't have an account? Register here", key="go_to_register", help="Click to navigate to the register page"):
-        st.switch_page("pages/register.py")
-    
-    if st.button("Forgot your password? Reset it here", key="go_to_reset_password", help="Click to navigate to reset password page"):
-        st.switch_page("pages/reset_password.py")
-    
-    # Admin Login Navigation Button
-    if st.button("Admin Login", key="go_to_admin", help="Click to navigate to the admin login page"):
-        st.switch_page("pages/adminlogin.py")
+    with st.container():
+        st.markdown('<div class="nav-button-container" style="width:220px; margin:auto;">', unsafe_allow_html=True)
+        if st.button("Don\'t have an account? Register here", key="goto_register"):
+            st.switch_page("pages/register.py")
+        st.markdown('</div>', unsafe_allow_html=True)
+with col3:
+    with st.container():
+        st.markdown('<div class="nav-button-container" style="width:220px; margin:auto;">', unsafe_allow_html=True)
+        if st.button("Admin Login", key="goto_admin"):
+            st.switch_page("pages/adminlogin.py")
+        st.markdown('</div>', unsafe_allow_html=True)

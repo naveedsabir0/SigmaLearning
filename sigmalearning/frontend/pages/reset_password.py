@@ -42,42 +42,39 @@ st.markdown("""
 # Backend URL
 BACKEND_URL = "http://127.0.0.1:5000/auth"
 
-st.title("SIGMA Learning Platform")
-st.subheader("Reset Password")
+# --- Step 1: Request Password Reset Email ---
+with st.form("request_reset_form"):
+    st.markdown("### Request Password Reset")
+    email = st.text_input("Enter your registered email", key="reset_email")
+    request_submit = st.form_submit_button("Send Reset Link")
+    if request_submit:
+        try:
+            response = requests.post(f"{BACKEND_URL}/forgot_password", json={"email": email})
+            if response.status_code == 200:
+                st.success("A password reset link has been sent to your email.")
+            else:
+                st.error(f"Error: {response.status_code} - {response.json().get('error', 'Request failed')}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to backend: {e}")
 
-# Step 1: Request Password Reset Email
-st.markdown("### Request Password Reset")
-email = st.text_input("Enter your registered email", key="reset_email")
-
-if st.button("Send Reset Link"):
-    try:
-        response = requests.post(f"{BACKEND_URL}/forgot_password", json={"email": email})
-        if response.status_code == 200:
-            st.success("A password reset link has been sent to your email.")
-        else:
-            st.error(f"Error: {response.status_code} - {response.json().get('error', 'Request failed')}")
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error connecting to backend: {e}")
-
-# Divider for UI clarity
 st.markdown("---")
 
-# Step 2: Reset Password
-st.markdown("### Enter New Password")
-reset_token = st.text_input("Enter your reset token", key="reset_token")
-new_password = st.text_input("New Password", type="password", key="new_password")
-
-if st.button("Reset Password"):
-    try:
-        response = requests.post(f"{BACKEND_URL}/reset_password", json={"reset_token": reset_token, "password": new_password})
-
-        if response.status_code == 200:
-            st.success("Your password has been reset successfully! You can now log in.")
-        else:
-            st.error(f"Error: {response.status_code} - {response.json().get('error', 'Password reset failed')}")
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error connecting to backend: {e}")
+# --- Step 2: Reset Password ---
+with st.form("reset_password_form"):
+    st.markdown("### Enter New Password")
+    reset_token = st.text_input("Enter your reset token", key="reset_token")
+    new_password = st.text_input("New Password", type="password", key="new_password")
+    reset_submit = st.form_submit_button("Reset Password")
+    if reset_submit:
+        try:
+            response = requests.post(f"{BACKEND_URL}/reset_password", json={"reset_token": reset_token, "password": new_password})
+            if response.status_code == 200:
+                st.success("Your password has been reset successfully! You can now log in.")
+            else:
+                st.error(f"Error: {response.status_code} - {response.json().get('error', 'Password reset failed')}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error connecting to backend: {e}")
 
 # Navigate Back to Login Page
 if st.button("Back to Login"):
-    st.switch_page("pages/login.py")  # ✅ Fixed navigation
+    st.switch_page("pages/login.py")

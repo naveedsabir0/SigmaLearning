@@ -32,14 +32,25 @@ def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-
     user = User.query.filter_by(username=username).first()
-
     if user and user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))  # Convert to string
         return jsonify({"message": "Login successful", "access_token": access_token})
     else:
         return jsonify({"message": "Invalid credentials"}), 401
+# @auth_bp.route('/login', methods=['POST'])
+# def login():
+#     data = request.get_json()
+#     username = data.get('username')
+#     password = data.get('password')
+
+#     user = User.query.filter_by(username=username).first()
+
+#     if user and user.check_password(password):
+#         access_token = create_access_token(identity=user.id)
+#         return jsonify({"message": "Login successful", "access_token": access_token})
+#     else:
+#         return jsonify({"message": "Invalid credentials"}), 401
 
 @auth_bp.route('/forgot_password', methods=['POST'])
 def forgot_password():
@@ -95,22 +106,34 @@ def reset_password():
 
     return jsonify({"message": "Password reset successful"}), 200
 
+# @auth_bp.route('/admin_login', methods=['POST'])
+# def admin_login():
+#     data = request.get_json()
+#     username = data.get('username')
+#     password = data.get('password')
+
+#     user = User.query.filter_by(username=username).first()
+
+#     if user and user.check_password(password):
+#         if user.is_admin:  # ✅ Check if the user is an admin
+#             access_token = create_access_token(identity=user.id)
+#             return jsonify({"message": "Admin login successful", "access_token": access_token, "redirect_url": "/pages/admin_dashboard.py"}), 200
+#         else:
+#             return jsonify({"error": "Access Denied: You are not an admin"}), 403
+#     else:
+#         return jsonify({"error": "Invalid credentials"}), 401
+
 @auth_bp.route('/admin_login', methods=['POST'])
 def admin_login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-
     user = User.query.filter_by(username=username).first()
-
     if user and user.check_password(password):
-        if user.is_admin:  # ✅ Check if the user is an admin
-            access_token = create_access_token(identity=user.id)
+        if user.is_admin:
+            access_token = create_access_token(identity=str(user.id))  # Convert to string
             return jsonify({"message": "Admin login successful", "access_token": access_token, "redirect_url": "/pages/admin_dashboard.py"}), 200
         else:
             return jsonify({"error": "Access Denied: You are not an admin"}), 403
     else:
         return jsonify({"error": "Invalid credentials"}), 401
-
-
-

@@ -34,8 +34,8 @@ app.register_blueprint(routes_bp, url_prefix="/api")
 if __name__ == '__main__':
     with app.app_context():
         # WARNING: drop_all() will delete all tables and data. Use only in development.
-        db.drop_all()
-        db.create_all()
+        #db.drop_all()
+        #db.create_all()
         # Create the superuser if it doesn't exist
         from models import User
         if not User.query.filter_by(username="SuperAdmin").first():

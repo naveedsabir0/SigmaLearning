@@ -4,8 +4,9 @@ from flask_mail import Mail
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your_secret_key")  # Store this in .env for security
-
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your_secret_key")  # Store in .env for security
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Limit payload to 16 MB for large uploads
+    
     # Flask-Mail Configuration
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 587
