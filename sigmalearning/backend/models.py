@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db
-from datetime import datetime  # if needed elsewhere
+from datetime import datetime
 from sqlalchemy import text
 
 class User(db.Model):
@@ -42,3 +42,11 @@ class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     comments = db.Column(db.Text, nullable=False)
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.String(50), unique=True, nullable=False)  # Unique identifier like "course1"
+    title = db.Column(db.String(100), nullable=False)
+    file_path = db.Column(db.String(200), nullable=False)  # Path to the course file (e.g., video)
+    description = db.Column(db.Text, nullable=True)
+    difficulty = db.Column(db.String(50), nullable=True)

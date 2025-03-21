@@ -2,13 +2,14 @@ import streamlit as st
 
 # Remove Streamlit's default sidebar
 st.set_page_config(
-    page_title="SIGMA Learning - Welcome", 
-    page_icon="🚀", 
-    layout="wide", 
-    initial_sidebar_state="collapsed"
+    page_title="SIGMA Learning - Welcome",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
-st.markdown(f"""
+st.markdown(
+    f"""
     <style>
         /* Hide Streamlit's sidebar */
         [data-testid="stSidebarNav"], [data-testid="stSidebar"] {{
@@ -181,27 +182,35 @@ st.markdown(f"""
             Your browser does not support the video tag.
         </video>
     </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Content Container
 st.markdown('<div class="container">', unsafe_allow_html=True)
 
 st.markdown('<div class="title">SIGMA Learning Platform</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Empowering digital education through innovation.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="subtitle">Empowering digital education through innovation.</div>',
+    unsafe_allow_html=True,
+)
 
 # Navigation Buttons
 st.markdown('<div class="button-container">', unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1])
 with col1:
     if st.button("Register"):
-        st.switch_page("pages/register.py")
+        st.switch_page("pages/register.py")  # Reverted to flat path
 with col2:
     if st.button("Login"):
-        st.switch_page("pages/login.py")
-st.markdown('</div>', unsafe_allow_html=True)
+        st.switch_page("pages/login.py")  # Reverted to flat path
+st.markdown("</div>", unsafe_allow_html=True)
 
 # Description paragraph placed after the buttons
-st.markdown('<div class="description">Discover an innovative platform that redefines digital learning with cutting-edge tools, interactive courses, and a community dedicated to educational excellence.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="description">Discover an innovative platform that redefines digital learning with cutting-edge tools, interactive courses, and a community dedicated to educational excellence.</div>',
+    unsafe_allow_html=True,
+)
 
 # Footer with social media icons (Instagram, Facebook, YouTube, LinkedIn)
 st.markdown(
@@ -228,7 +237,7 @@ st.markdown(
         </div>
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)

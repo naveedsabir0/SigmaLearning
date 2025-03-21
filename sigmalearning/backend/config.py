@@ -2,7 +2,7 @@ import os
 from flask_mail import Mail
 
 # Define the base directory for the backend folder
-basedir = os.path.abspath(os.path.dirname(__file__))  # Set the base directory for the app
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "instance", "database.db")

@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request, current_app
-from models import db, User, Feedback
+from flask import Blueprint, jsonify, request, current_app, send_file
+import os
+from models import db, User, Feedback, Course  # Import Course model
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 routes_bp = Blueprint("routes", __name__)
@@ -89,3 +90,32 @@ def update_profile():
         current_app.logger.error("Error updating profile: %s", e)
         db.session.rollback()
         return jsonify({"error": "An error occurred while updating profile"}), 500
+
+# Enhanced endpoint for course download
+@routes_bp.route('/download_course/<course_id>', methods=['GET'])
+@jwt_required()
+def download_course(course_id):
+    try:
+        # Fetch the course from the database using course_id
+        course = Course.query.filter_by(course_id=course_id).first()
+        if not course:
+            return jsonify({"error": "Course not found"}), 404
+
+        # Construct the file path from the database
+        file_path = os.path.join(current_app.root_path, 'courses', course.file_path)
+        if not os.path.exists(file_path):
+            return jsonify({"error": "Course file not found on server"}), 404
+
+        # Serve the file with a proper filename
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=f"{course.title}.mp4"  # Customize the filename
+        )
+    except Exception as e:
+        current_app.logger.error("Error downloading course %s: %s", course_id, e)
+        return jsonify({"error": "An error occurred while downloading the course"}), 500
+
+@routes_bp.route('/health', methods=['GET'])
+def health():
+    return jsonify({"message": "Server is running"}), 200

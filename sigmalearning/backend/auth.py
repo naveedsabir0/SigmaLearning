@@ -7,7 +7,7 @@ from flask_mail import Message
 from config import mail
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from twilio.rest import Client
+#from twilio.rest import Client
 import os
 
 auth_bp = Blueprint("auth", __name__)
